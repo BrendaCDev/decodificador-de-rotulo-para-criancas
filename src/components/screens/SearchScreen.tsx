@@ -1,28 +1,87 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FOODS, type Food } from "@/lib/game-data";
+import { lookupBarcode, searchFoodsByName } from "@/lib/openfoodfacts";
 
 export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
   const [query, setQuery] = useState("");
   const [barcode, setBarcode] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<Food[]>(FOODS.slice(0, 6));
+  const abortRef = useRef<AbortController | null>(null);
 
-  const results = query
-    ? FOODS.filter((f) => f.name.toLowerCase().includes(query.toLowerCase()))
-    : FOODS.slice(0, 6);
+  // Debounced live search via Open Food Facts
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults(FOODS.slice(0, 6));
+      setLoading(false);
+      setError(null);
+      abortRef.current?.abort();
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const handle = setTimeout(async () => {
+      abortRef.current?.abort();
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+      try {
+        const list = await searchFoodsByName(q, ctrl.signal);
+        if (ctrl.signal.aborted) return;
+        // Mix local mocks that match as fallback
+        const local = FOODS.filter((f) => f.name.toLowerCase().includes(q.toLowerCase()));
+        const merged = [...list, ...local].slice(0, 24);
+        setResults(merged);
+        if (merged.length === 0) setError("Nenhum produto encontrado.");
+      } catch (e: any) {
+        if (e?.name === "AbortError") return;
+        setError("Falha ao consultar o banco da Guilda. Tente de novo.");
+      } finally {
+        if (!ctrl.signal.aborted) setLoading(false);
+      }
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [query]);
 
-  function simulateScan() {
+  async function simulateScan() {
     setScanning(true);
-    setTimeout(() => {
-      const random = FOODS[Math.floor(Math.random() * FOODS.length)];
-      setScanning(false);
-      onPick(random);
-    }, 1600);
+    // Pick a random known barcode from the local mocks to simulate a real scan
+    const sample = FOODS[Math.floor(Math.random() * FOODS.length)];
+    try {
+      const found = await lookupBarcode(sample.barcode);
+      setTimeout(() => {
+        setScanning(false);
+        onPick(found ?? sample);
+      }, 1200);
+    } catch {
+      setTimeout(() => {
+        setScanning(false);
+        onPick(sample);
+      }, 1200);
+    }
   }
 
-  function lookupBarcode() {
-    const f = FOODS.find((x) => x.barcode === barcode.trim());
-    if (f) onPick(f);
-    else alert("Código não encontrado no banco da Guilda!");
+  async function doLookupBarcode() {
+    const code = barcode.trim();
+    if (!code) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const found = await lookupBarcode(code);
+      if (found) {
+        onPick(found);
+      } else {
+        const local = FOODS.find((x) => x.barcode === code);
+        if (local) onPick(local);
+        else setError("Código não encontrado no banco da Guilda!");
+      }
+    } catch {
+      setError("Falha ao consultar a API. Verifique sua conexão.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -53,35 +112,43 @@ export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
       </div>
 
       <div className="pixel-border bg-card p-5 space-y-3">
-        <label className="font-display text-xs">Digitar código de barras</label>
+        <label className="font-display text-xs">Digitar código de barras (Open Food Facts)</label>
         <div className="flex gap-2">
           <input
             value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            placeholder="7891000100103"
+            onChange={(e) => setBarcode(e.target.value.replace(/[^0-9]/g, ""))}
+            onKeyDown={(e) => { if (e.key === "Enter") doLookupBarcode(); }}
+            placeholder="Ex: 7622210449283"
             className="flex-1 px-3 py-2 bg-input border-2 border-border font-body text-lg"
+            inputMode="numeric"
           />
-          <button className="pixel-btn secondary" onClick={lookupBarcode}>Buscar</button>
+          <button className="pixel-btn secondary" onClick={doLookupBarcode} disabled={loading}>
+            {loading ? "..." : "Buscar"}
+          </button>
         </div>
       </div>
 
       <div className="pixel-border bg-card p-5 space-y-3">
-        <label className="font-display text-xs">Pesquisar por nome</label>
+        <label className="font-display text-xs">Pesquisar por nome (tempo real)</label>
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ex: maçã, biscoito..."
+          placeholder="Ex: nutella, biscoito, maçã..."
           className="w-full px-3 py-2 bg-input border-2 border-border font-body text-lg"
         />
+        <div className="flex items-center justify-between text-xs opacity-70 font-display">
+          <span>{loading ? "🔎 Buscando na API..." : `${results.length} resultado(s)`}</span>
+          {error && <span className="text-destructive">{error}</span>}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2">
           {results.map((f) => (
             <button
-              key={f.barcode}
+              key={`${f.barcode}-${f.name}`}
               onClick={() => onPick(f)}
               className="pixel-border bg-background/60 p-3 hover:bg-primary/30 transition-colors text-left"
             >
               <div className="text-3xl">{f.emoji}</div>
-              <div className="font-display text-xs mt-1">{f.name}</div>
+              <div className="font-display text-xs mt-1 line-clamp-2 break-words">{f.name}</div>
               <div className="text-xs opacity-60">Nutri-Score: <span className="text-accent font-display">{f.score}</span></div>
             </button>
           ))}
