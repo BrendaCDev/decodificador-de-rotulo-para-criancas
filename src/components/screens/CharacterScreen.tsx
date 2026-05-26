@@ -1,4 +1,5 @@
 import { CHARACTERS, type Character } from "@/lib/game-data";
+import { HERO_SPRITES } from "@/lib/sprites";
 
 export function CharacterScreen({ onPick }: { onPick: (c: Character) => void }) {
   return (
@@ -14,7 +15,16 @@ export function CharacterScreen({ onPick }: { onPick: (c: Character) => void }) 
             onClick={() => onPick(c)}
             className="pixel-border bg-card p-5 text-left space-y-3 hover:scale-[1.03] transition-transform"
           >
-            <div className="text-6xl float-y text-center">{c.emoji}</div>
+            <div className="flex justify-center h-32 items-center">
+              <img
+                src={HERO_SPRITES[c.id]}
+                alt={c.name}
+                width={128}
+                height={128}
+                loading="lazy"
+                className="sprite w-32 h-32 object-contain float-y drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
+              />
+            </div>
             <div className="font-display text-sm text-center" style={{ color: `var(--color-${c.color})` }}>
               {c.name}
             </div>
