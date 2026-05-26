@@ -144,7 +144,15 @@ export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
           {results.map((f) => (
             <button
               key={`${f.barcode}-${f.name}`}
-              onClick={() => onPick(f)}
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  const full = await enrichFood(f);
+                  onPick(full);
+                } finally {
+                  setLoading(false);
+                }
+              }}
               className="pixel-border bg-background/60 p-3 hover:bg-primary/30 transition-colors text-left"
             >
               <div className="text-3xl">{f.emoji}</div>
