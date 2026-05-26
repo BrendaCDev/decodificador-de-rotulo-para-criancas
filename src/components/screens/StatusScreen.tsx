@@ -3,13 +3,14 @@ import { applyFoodToStats, type Character, type Food, type PlayerStats } from "@
 import { CharacterCard } from "@/components/HUD";
 
 export function StatusScreen({
-  character, stats, food, onContinue, onBack,
+  character, stats, food, onContinue, onBack, onScanMore,
 }: {
   character: Character;
   stats: PlayerStats;
   food: Food;
   onContinue: (next: PlayerStats) => void;
   onBack: () => void;
+  onScanMore: (next: PlayerStats) => void;
 }) {
   const result = useMemo(() => applyFoodToStats(stats, food), [stats, food]);
   const scoreColors: Record<string, string> = { A: "neon-green", B: "neon-cyan", C: "neon-yellow", D: "accent", E: "destructive" };
@@ -61,8 +62,9 @@ export function StatusScreen({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button className="pixel-btn secondary" onClick={onBack}>← Outro alimento</button>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
+        <button className="pixel-btn secondary" onClick={onBack}>← Voltar</button>
+        <button className="pixel-btn" onClick={() => onScanMore(result.stats)}>📷 Escanear outro alimento</button>
         <button className="pixel-btn accent" onClick={() => onContinue(result.stats)}>⚔️ Ir para batalha!</button>
       </div>
     </div>

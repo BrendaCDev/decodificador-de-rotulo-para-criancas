@@ -61,6 +61,7 @@ function App() {
           <StatusScreen
             character={character} stats={stats} food={food}
             onBack={() => setStep("search")}
+            onScanMore={(s) => { setStats(s); setFood(null); setStep("search"); }}
             onContinue={(s) => { setStats(s); setStep("battle"); }}
           />
         )}
