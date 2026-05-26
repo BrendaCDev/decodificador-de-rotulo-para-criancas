@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FOODS, type Food } from "@/lib/game-data";
-import { lookupBarcode, searchFoodsByName } from "@/lib/openfoodfacts";
+import { enrichFood, lookupBarcode, searchFoodsByName } from "@/lib/openfoodfacts";
 
 export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
   const [query, setQuery] = useState("");
