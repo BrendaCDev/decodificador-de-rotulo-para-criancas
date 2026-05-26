@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "decodificador de rotulo para crianças." },
+      { name: "description", content: "NutriQuest Kids transforms healthy eating into a fun RPG adventure for children, making label reading interactive." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "decodificador de rotulo para crianças." },
+      { property: "og:description", content: "NutriQuest Kids transforms healthy eating into a fun RPG adventure for children, making label reading interactive." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "decodificador de rotulo para crianças." },
+      { name: "twitter:description", content: "NutriQuest Kids transforms healthy eating into a fun RPG adventure for children, making label reading interactive." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3706aab2-2a8c-40a4-9d0b-3f9d122feaa2/id-preview-fac9bafe--e8a2055c-7cbb-4ffa-8b07-f3ff0ff8d0a6.lovable.app-1779815938153.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/3706aab2-2a8c-40a4-9d0b-3f9d122feaa2/id-preview-fac9bafe--e8a2055c-7cbb-4ffa-8b07-f3ff0ff8d0a6.lovable.app-1779815938153.png" },
     ],
     links: [
       {
