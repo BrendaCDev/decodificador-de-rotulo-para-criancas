@@ -62,8 +62,9 @@ export function StatusScreen({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button className="pixel-btn secondary" onClick={onBack}>← Outro alimento</button>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
+        <button className="pixel-btn secondary" onClick={onBack}>← Voltar</button>
+        <button className="pixel-btn" onClick={() => onScanMore(result.stats)}>📷 Escanear outro alimento</button>
         <button className="pixel-btn accent" onClick={() => onContinue(result.stats)}>⚔️ Ir para batalha!</button>
       </div>
     </div>
