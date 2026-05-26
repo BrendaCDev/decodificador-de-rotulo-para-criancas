@@ -36,16 +36,18 @@ export function StatusScreen({
               {food.score}
             </div>
           </div>
+          <div className="text-xs opacity-60 font-display">VALORES POR 100g</div>
           <div className="grid grid-cols-2 gap-2 font-body text-base">
-            <div>🍬 Açúcar: <b>{food.sugar}g</b></div>
-            <div>🧂 Sódio: <b>{food.sodium}mg</b></div>
-            <div>🧈 Gordura: <b>{food.fat}g</b></div>
-            <div>🌾 Fibra: <b>{food.fiber}g</b></div>
-            <div>💪 Proteína: <b>{food.protein}g</b></div>
+            <div>🍬 Açúcar: <b>{food.sugar > 0 ? `${food.sugar}g` : "n/d"}</b></div>
+            <div>🧂 Sódio: <b>{food.sodium > 0 ? `${food.sodium}mg` : "n/d"}</b></div>
+            <div>🧈 Gordura: <b>{food.fat > 0 ? `${food.fat}g` : "n/d"}</b></div>
+            <div>🌾 Fibra: <b>{food.fiber > 0 ? `${food.fiber}g` : "n/d"}</b></div>
+            <div>💪 Proteína: <b>{food.protein > 0 ? `${food.protein}g` : "n/d"}</b></div>
           </div>
           <div className="pixel-border bg-background/70 p-3 text-center font-display text-xs pop-in">
             {result.message}
           </div>
+          <div className="text-[10px] opacity-50 text-center">Fonte: Open Food Facts</div>
         </div>
 
         <div className="space-y-4">
