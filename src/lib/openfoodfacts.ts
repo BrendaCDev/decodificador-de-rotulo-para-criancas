@@ -73,6 +73,16 @@ function toNutriScore(grade: unknown, n: any): NutriScore {
   return estimateScore(n);
 }
 
+function toEcoScore(p: any): EcoScore {
+  const raw =
+    p?.ecoscore_grade ??
+    p?.environmental_score_grade ??
+    p?.ecoscore_data?.grade;
+  const g = String(raw ?? "").toUpperCase();
+  if (g === "A" || g === "B" || g === "C" || g === "D" || g === "E") return g;
+  return "?";
+}
+
 function productToFood(p: any): Food | null {
   if (!p) return null;
   const rawName: string =
@@ -91,6 +101,7 @@ function productToFood(p: any): Food | null {
     name: name.length > 60 ? name.slice(0, 60) + "…" : name,
     emoji: pickEmoji(name, p.categories),
     score: toNutriScore(p.nutriscore_grade ?? p.nutrition_grades, n),
+    ecoScore: toEcoScore(p),
     sugar: num(n.sugars_100g) ?? 0,
     sodium: Math.round(sodiumMg),
     fat: num(n.fat_100g) ?? 0,
