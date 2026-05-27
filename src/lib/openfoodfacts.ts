@@ -1,4 +1,4 @@
-import type { Food, NutriScore } from "./game-data";
+import type { EcoScore, Food, NutriScore } from "./game-data";
 
 const SEARCH_V2 = "https://world.openfoodfacts.org/api/v2/search";
 const SEARCH_LEGACY = "https://world.openfoodfacts.org/cgi/search.pl";
@@ -8,6 +8,8 @@ const FIELDS = [
   "code", "product_name", "product_name_pt", "generic_name", "brands",
   "categories", "categories_tags", "image_front_small_url",
   "nutriscore_grade", "nutrition_grades", "nutriments",
+  "ecoscore_grade", "ecoscore_score", "ecoscore_data",
+  "environmental_score_grade", "environmental_score_score",
 ].join(",");
 
 function pickEmoji(name: string, categories?: string): string {
