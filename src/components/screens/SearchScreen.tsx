@@ -157,7 +157,7 @@ export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
             >
               <div className="text-3xl">{f.emoji}</div>
               <div className="font-display text-xs mt-1 line-clamp-2 break-words">{f.name}</div>
-              <div className="text-xs opacity-60">Nutri-Score: <span className="text-accent font-display">{f.score}</span></div>
+              <div className="text-xs opacity-60">Nutri: <span className="text-accent font-display">{f.score}</span> · Eco: <span className="text-neon-green font-display">{f.ecoScore ?? "?"}</span></div>
             </button>
           ))}
         </div>
