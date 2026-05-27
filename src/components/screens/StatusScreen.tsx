@@ -33,12 +33,21 @@ export function StatusScreen({
               <div className="text-xs opacity-60">Código: {food.barcode}</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="font-display text-xs">NUTRI-SCORE:</div>
-            <div className="font-display text-3xl px-4 py-2 border-4 border-foreground" style={{ background: `var(--color-${scoreColors[food.score]})`, color: "oklch(0.15 0.05 290)" }}>
-              {food.score}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="font-display text-xs">NUTRI-SCORE:</div>
+              <div className="font-display text-3xl px-4 py-2 border-4 border-foreground" style={{ background: `var(--color-${scoreColors[food.score]})`, color: "oklch(0.15 0.05 290)" }}>
+                {food.score}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="font-display text-xs">🌱 ECO-SCORE:</div>
+              <div className="font-display text-3xl px-4 py-2 border-4 border-foreground" style={{ background: `var(--color-${ecoColors[eco]})`, color: "oklch(0.15 0.05 290)" }}>
+                {eco}
+              </div>
             </div>
           </div>
+          <div className="text-[10px] opacity-70 font-display">🌍 {ecoLabels[eco]}</div>
           <div className="text-xs opacity-60 font-display">VALORES POR 100g</div>
           <div className="grid grid-cols-2 gap-2 font-body text-base">
             <div>🍬 Açúcar: <b>{food.sugar > 0 ? `${food.sugar}g` : "n/d"}</b></div>
