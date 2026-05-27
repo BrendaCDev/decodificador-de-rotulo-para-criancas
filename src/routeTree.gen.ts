@@ -10,43 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiFoodFactsRouteImport } from './routes/api/food-facts'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiFoodFactsRoute = ApiFoodFactsRouteImport.update({
-  id: '/api/food-facts',
-  path: '/api/food-facts',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/food-facts': typeof ApiFoodFactsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/food-facts': typeof ApiFoodFactsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/food-facts': typeof ApiFoodFactsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/food-facts'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/food-facts'
-  id: '__root__' | '/' | '/api/food-facts'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiFoodFactsRoute: typeof ApiFoodFactsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/food-facts': {
-      id: '/api/food-facts'
-      path: '/api/food-facts'
-      fullPath: '/api/food-facts'
-      preLoaderRoute: typeof ApiFoodFactsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiFoodFactsRoute: ApiFoodFactsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
