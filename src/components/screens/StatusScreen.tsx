@@ -14,6 +14,9 @@ export function StatusScreen({
 }) {
   const result = useMemo(() => applyFoodToStats(stats, food), [stats, food]);
   const scoreColors: Record<string, string> = { A: "neon-green", B: "neon-cyan", C: "neon-yellow", D: "accent", E: "destructive" };
+  const ecoColors: Record<string, string> = { A: "neon-green", B: "neon-cyan", C: "neon-yellow", D: "accent", E: "destructive", "?": "muted-foreground" };
+  const ecoLabels: Record<string, string> = { A: "Impacto muito baixo", B: "Impacto baixo", C: "Impacto moderado", D: "Impacto alto", E: "Impacto muito alto", "?": "Sem dados ambientais" };
+  const eco = food.ecoScore ?? "?";
 
   return (
     <div className="space-y-6">
