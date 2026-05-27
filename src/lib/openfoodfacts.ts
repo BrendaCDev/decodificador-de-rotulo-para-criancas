@@ -1,16 +1,26 @@
 import type { EcoScore, Food, NutriScore } from "./game-data";
 
-const SEARCH_V2 = "https://world.openfoodfacts.org/api/v2/search";
-const SEARCH_LEGACY = "https://world.openfoodfacts.org/cgi/search.pl";
-const PRODUCT_URL = "https://world.openfoodfacts.org/api/v2/product";
+const LOCAL_API = "/api/food-facts";
 
-const FIELDS = [
-  "code", "product_name", "product_name_pt", "generic_name", "brands",
-  "categories", "categories_tags", "image_front_small_url",
-  "nutriscore_grade", "nutrition_grades", "nutriments",
-  "ecoscore_grade", "ecoscore_score", "ecoscore_data",
-  "environmental_score_grade", "environmental_score_score",
-].join(",");
+type FoodFactsSearchResponse = {
+  ok: boolean;
+  products?: unknown[];
+  error?: string;
+  fallback?: boolean;
+};
+
+type FoodFactsProductResponse = {
+  ok: boolean;
+  product?: unknown | null;
+  error?: string;
+  fallback?: boolean;
+};
+
+async function readApiJson<T>(res: Response): Promise<T> {
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data) throw new Error("OFF proxy response failed");
+  return data as T;
+}
 
 function pickEmoji(name: string, categories?: string): string {
   const s = `${name} ${categories ?? ""}`.toLowerCase();
@@ -46,7 +56,7 @@ function num(v: unknown): number | null {
 // Estimate Nutri-Score from nutriments when missing (simplified Nutri-Score 2017)
 function estimateScore(n: any): NutriScore {
   const sugars = num(n?.sugars_100g) ?? 0;
-  const fat = num(n?.saturated_fat_100g) ?? num(n?.fat_100g) ?? 0;
+  const fat = num(n?.["saturated-fat_100g"]) ?? num(n?.saturated_fat_100g) ?? num(n?.fat_100g) ?? 0;
   const sodium = num(n?.sodium_100g) != null ? (num(n?.sodium_100g) as number) * 1000 : (num(n?.salt_100g) ?? 0) * 400;
   const fiber = num(n?.fiber_100g) ?? 0;
   const protein = num(n?.proteins_100g) ?? 0;
@@ -113,38 +123,24 @@ function productToFood(p: any): Food | null {
 export async function searchFoodsByName(query: string, signal?: AbortSignal): Promise<Food[]> {
   const q = query.trim();
   if (!q) return [];
-
-  // Try v2 search first (more reliable, JSON-native)
-  const v2 = `${SEARCH_V2}?search_terms=${encodeURIComponent(q)}&page_size=24&fields=${FIELDS}`;
-  try {
-    const res = await fetch(v2, { signal, headers: { Accept: "application/json" } });
-    if (res.ok) {
-      const data = await res.json();
-      const products: any[] = Array.isArray(data.products) ? data.products : [];
-      const list = products.map(productToFood).filter((f): f is Food => !!f && !!f.barcode);
-      if (list.length) return list;
-    }
-  } catch (e: any) {
-    if (e?.name === "AbortError") throw e;
-  }
-
-  // Fallback: legacy CGI search
-  const legacy = `${SEARCH_LEGACY}?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=24&fields=${FIELDS}`;
-  const res = await fetch(legacy, { signal, headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`OFF search ${res.status}`);
-  const data = await res.json();
-  const products: any[] = Array.isArray(data.products) ? data.products : [];
+  const params = new URLSearchParams({ type: "search", q });
+  const res = await fetch(`${LOCAL_API}?${params.toString()}`, { signal, headers: { Accept: "application/json" } });
+  const data = await readApiJson<FoodFactsSearchResponse>(res);
+  if (!data.ok) throw new Error(data.error ?? "OFF search unavailable");
+  const products = Array.isArray(data.products) ? data.products : [];
   return products.map(productToFood).filter((f): f is Food => !!f && !!f.barcode);
 }
 
 export async function lookupBarcode(barcode: string, signal?: AbortSignal): Promise<Food | null> {
   const code = barcode.trim();
   if (!code) return null;
-  const url = `${PRODUCT_URL}/${encodeURIComponent(code)}.json?fields=${FIELDS}`;
-  const res = await fetch(url, { signal, headers: { Accept: "application/json" } });
-  if (!res.ok) return null;
-  const data = await res.json();
-  if (data.status !== 1) return null;
+  const params = new URLSearchParams({ type: "product", code });
+  const res = await fetch(`${LOCAL_API}?${params.toString()}`, { signal, headers: { Accept: "application/json" } });
+  const data = await readApiJson<FoodFactsProductResponse>(res);
+  if (!data.ok) {
+    if (data.fallback) throw new Error(data.error ?? "OFF product unavailable");
+    return null;
+  }
   return productToFood(data.product);
 }
 
