@@ -1,10 +1,12 @@
 export type NutriScore = "A" | "B" | "C" | "D" | "E";
+export type EcoScore = "A" | "B" | "C" | "D" | "E" | "?";
 
 export interface Food {
   barcode: string;
   name: string;
   emoji: string;
   score: NutriScore;
+  ecoScore?: EcoScore;
   sugar: number; // g/100g
   sodium: number; // mg/100g
   fat: number; // g/100g
