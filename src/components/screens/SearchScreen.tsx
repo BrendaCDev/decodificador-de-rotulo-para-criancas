@@ -11,6 +11,16 @@ export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
   const [results, setResults] = useState<Food[]>(FOODS.slice(0, 6));
   const abortRef = useRef<AbortController | null>(null);
 
+  function mergeFoods(apiFoods: Food[], localFoods: Food[]) {
+    const seen = new Set<string>();
+    return [...apiFoods, ...localFoods].filter((food) => {
+      const key = food.barcode || food.name.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 24);
+  }
+
   // Debounced live search via Open Food Facts
   useEffect(() => {
     const q = query.trim();
@@ -32,12 +42,14 @@ export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
         if (ctrl.signal.aborted) return;
         // Mix local mocks that match as fallback
         const local = FOODS.filter((f) => f.name.toLowerCase().includes(q.toLowerCase()));
-        const merged = [...list, ...local].slice(0, 24);
+        const merged = mergeFoods(list, local);
         setResults(merged);
         if (merged.length === 0) setError("Nenhum produto encontrado.");
       } catch (e: any) {
         if (e?.name === "AbortError") return;
-        setError("Falha ao consultar o banco da Guilda. Tente de novo.");
+        const local = FOODS.filter((f) => f.name.toLowerCase().includes(q.toLowerCase()));
+        setResults(local.length ? local : FOODS.slice(0, 6));
+        setError("Open Food Facts instável. Mostrando itens locais por enquanto.");
       } finally {
         if (!ctrl.signal.aborted) setLoading(false);
       }
@@ -149,10 +161,13 @@ export function SearchScreen({ onPick }: { onPick: (food: Food) => void }) {
                 try {
                   const full = await enrichFood(f);
                   onPick(full);
+                } catch {
+                  onPick(f);
                 } finally {
                   setLoading(false);
                 }
               }}
+              disabled={loading}
               className="pixel-border bg-background/60 p-3 hover:bg-primary/30 transition-colors text-left"
             >
               <div className="text-3xl">{f.emoji}</div>
