@@ -56,8 +56,9 @@ export function StatusScreen({
             <div>🌾 Fibra: <b>{food.fiber > 0 ? `${food.fiber}g` : "n/d"}</b></div>
             <div>💪 Proteína: <b>{food.protein > 0 ? `${food.protein}g` : "n/d"}</b></div>
           </div>
-          <div className="pixel-border bg-background/70 p-3 text-center font-display text-xs pop-in">
-            {result.message}
+          <div className="pixel-border bg-background/70 p-3 text-center font-display text-xs pop-in space-y-1">
+            <div>{result.message}</div>
+            <div style={{ color: `var(--color-${ecoColors[eco]})` }}>{result.ecoMessage}</div>
           </div>
           <div className="text-[10px] opacity-50 text-center">Fonte: Open Food Facts</div>
         </div>
@@ -65,13 +66,18 @@ export function StatusScreen({
         <div className="space-y-4">
           <CharacterCard char={character} stats={result.stats} />
           <div className="pixel-border bg-card p-4 space-y-2">
-            <div className="font-display text-xs text-accent">EFEITOS</div>
+            <div className="font-display text-xs text-accent">EFEITOS TOTAIS</div>
             <ul className="font-body text-base space-y-1">
               <li>❤️ HP: <span className={result.delta.hp >= 0 ? "text-neon-green" : "text-destructive"}>{result.delta.hp >= 0 ? "+" : ""}{result.delta.hp}</span></li>
               <li>⚔️ ATK: <span className={result.delta.atk >= 0 ? "text-neon-green" : "text-destructive"}>{result.delta.atk >= 0 ? "+" : ""}{result.delta.atk}</span></li>
               <li>🛡️ DEF: <span className={result.delta.def >= 0 ? "text-neon-green" : "text-destructive"}>{result.delta.def >= 0 ? "+" : ""}{result.delta.def}</span></li>
-              <li>⭐ XP: <span className="text-accent">+{result.delta.xp}</span></li>
+              <li>⭐ XP: <span className={result.delta.xp >= 0 ? "text-accent" : "text-destructive"}>{result.delta.xp >= 0 ? "+" : ""}{result.delta.xp}</span></li>
             </ul>
+            <div className="pt-2 border-t-2 border-border/60 space-y-1 text-xs font-body opacity-90">
+              <div className="font-display text-[10px] text-neon-green">🌱 BÔNUS ECO ({eco})</div>
+              <div>❤️ HP: <span className={result.ecoDelta.hp >= 0 ? "text-neon-green" : "text-destructive"}>{result.ecoDelta.hp >= 0 ? "+" : ""}{result.ecoDelta.hp}</span> · ⭐ XP: <span className={result.ecoDelta.xp >= 0 ? "text-accent" : "text-destructive"}>{result.ecoDelta.xp >= 0 ? "+" : ""}{result.ecoDelta.xp}</span></div>
+              <div className="text-[10px] opacity-70">Impacto ambiental também afeta seu personagem.</div>
+            </div>
           </div>
         </div>
       </div>

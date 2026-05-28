@@ -78,7 +78,7 @@ export interface PlayerStats {
   xp: number;
 }
 
-export function applyFoodToStats(stats: PlayerStats, food: Food): { stats: PlayerStats; delta: { hp: number; atk: number; def: number; xp: number }; message: string } {
+export function applyFoodToStats(stats: PlayerStats, food: Food): { stats: PlayerStats; delta: { hp: number; atk: number; def: number; xp: number }; ecoDelta: { hp: number; xp: number }; message: string; ecoMessage: string } {
   const scoreMap: Record<NutriScore, { hp: number; atk: number; def: number; xp: number }> = {
     A: { hp: 15, atk: 3, def: 3, xp: 50 },
     B: { hp: 8, atk: 2, def: 2, xp: 30 },
@@ -86,13 +86,34 @@ export function applyFoodToStats(stats: PlayerStats, food: Food): { stats: Playe
     D: { hp: -10, atk: -1, def: -1, xp: 5 },
     E: { hp: -20, atk: -2, def: -2, xp: 0 },
   };
+  const ecoMap: Record<EcoScore, { hp: number; xp: number }> = {
+    A: { hp: 10, xp: 20 },
+    B: { hp: 5, xp: 10 },
+    C: { hp: 0, xp: 0 },
+    D: { hp: -5, xp: -5 },
+    E: { hp: -10, xp: -10 },
+    "?": { hp: 0, xp: 0 },
+  };
+  const ecoMessages: Record<EcoScore, string> = {
+    A: "🌱 Eco A: produção super sustentável! +10 HP e +20 XP verdes!",
+    B: "🌿 Eco B: baixo impacto ambiental. +5 HP e +10 XP.",
+    C: "🌍 Eco C: impacto moderado. Sem efeito ambiental.",
+    D: "♨️ Eco D: alto impacto ambiental. -5 HP e -5 XP.",
+    E: "🛢️ Eco E: impacto ambiental severo! -10 HP e -10 XP.",
+    "?": "❔ Eco desconhecido: sem efeito ambiental.",
+  };
   const d = scoreMap[food.score];
+  const eco = food.ecoScore ?? "?";
+  const e = ecoMap[eco];
+  const totalHP = d.hp + e.hp;
+  const totalXP = d.xp + e.xp;
+  const delta = { hp: totalHP, atk: d.atk, def: d.def, xp: totalXP };
   const newStats: PlayerStats = {
-    maxHP: stats.maxHP + Math.max(0, d.hp),
-    hp: Math.max(1, Math.min(stats.maxHP + Math.max(0, d.hp), stats.hp + d.hp)),
+    maxHP: stats.maxHP + Math.max(0, totalHP),
+    hp: Math.max(1, Math.min(stats.maxHP + Math.max(0, totalHP), stats.hp + totalHP)),
     atk: Math.max(5, stats.atk + d.atk),
     def: Math.max(2, stats.def + d.def),
-    xp: stats.xp + d.xp,
+    xp: Math.max(0, stats.xp + totalXP),
   };
   const messages: Record<NutriScore, string> = {
     A: "⚡ BUFF MÁXIMO! Poder lendário ativado!",
@@ -101,5 +122,5 @@ export function applyFoodToStats(stats: PlayerStats, food: Food): { stats: Playe
     D: "⚠️ Debuff! Cuidado com o excesso.",
     E: "💀 DEBUFF CRÍTICO! Veneno ultraprocessado!",
   };
-  return { stats: newStats, delta: d, message: messages[food.score] };
+  return { stats: newStats, delta, ecoDelta: e, message: messages[food.score], ecoMessage: ecoMessages[eco] };
 }
